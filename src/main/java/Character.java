@@ -5,7 +5,7 @@ public class Character {
     private static String sourceStr = "";
     private static final Set<java.lang.Character> specialStartCharacters = Set.of('[', '\\', '$');
     private static final Set<String> specialEndCharacters = Set.of("]", "\\w", "\\d");
-    private static final Set<java.lang.Character> multiplierChar = Set.of('+');
+    private static final Set<java.lang.Character> multiplierChars = Set.of('+', '?');
 
     Character(String source) { this.sourceStr = source; }
 
@@ -32,20 +32,20 @@ public class Character {
         } else if (currPattern.startsWith("[^")) {
             int index = currPattern.indexOf("]", currPattern.indexOf("[^"));
             if (index + 1 < pattern.length() &&
-                    multiplierChar.contains(currPattern.charAt(index + 1))) {
+                    multiplierChars.contains(currPattern.charAt(index + 1))) {
                 return currPattern.substring(0, index + 2);
             }
             return currPattern.substring(0, index + 1);
         } else if (currPattern.startsWith("[")) {
             int index = currPattern.indexOf("]", currPattern.indexOf("["));
             if (index + 1 < pattern.length() &&
-                    multiplierChar.contains(currPattern.charAt(index + 1))) {
+                    multiplierChars.contains(currPattern.charAt(index + 1))) {
                 return currPattern.substring(0, index + 2);
             }
             return currPattern.substring(0, index + 1);
         } else {
             if (currPointer + 1 < currPattern.length() &&
-                    multiplierChar.contains(pattern.charAt(currPointer + 1))) {
+                    multiplierChars.contains(pattern.charAt(currPointer + 1))) {
                 return currPattern.substring(0, 2);
             }
             return currPattern.substring(0, 1);
@@ -143,6 +143,16 @@ public class Character {
                     ans = count > 0;
                     if (count > 0)
                         inputPointer--;
+                } else if (currRegex.contains("?")) {
+                    int count = 0;
+                    while (inputLine.charAt(inputPointer) >= '0' &&
+                            inputLine.charAt(inputPointer) <= '9') {
+                        count++;
+                        inputPointer++;
+                    }
+                    ans = count <= 1;
+                    if (count >= 0)
+                        inputPointer--;
                 }
             } else if (currRegex.startsWith("\\w")) {
                 if (currRegex.equals("\\w"))
@@ -156,6 +166,15 @@ public class Character {
                     ans = count > 0;
                     if (count > 0)
                         inputPointer--;
+                } else if (currRegex.contains("?")) {
+                    int count = 0;
+                    while (hasAlphaNumericAndUnderScore(inputLine.charAt(inputPointer))) {
+                        count++;
+                        inputPointer++;
+                    }
+                    ans = count <= 0;
+                    if (count >= 0)
+                        inputPointer--;
                 }
             } else if (currRegex.contains("[^") && currRegex.contains("]")) {
                 if (currRegex.endsWith("+")) {
@@ -167,6 +186,16 @@ public class Character {
                     }
                     ans = count > 0;
                     if (count > 0)
+                        inputPointer--;
+                } else if (currRegex.endsWith("?")) {
+                    int count = 0;
+                    while (notContainsTheseParameters(inputLine.charAt(inputPointer),
+                            currRegex)) {
+                        count++;
+                        inputPointer++;
+                    }
+                    ans = count <= 1;
+                    if (count >= 0)
                         inputPointer--;
                 } else
                     ans = notContainsTheseParameters(inputLine.charAt(inputPointer),
@@ -181,6 +210,16 @@ public class Character {
                     }
                     ans = count > 0;
                     if (count > 0)
+                        inputPointer--;
+                } else if (currRegex.endsWith("?")) {
+                    int count = 0;
+                    while (containsTheseParameters(inputLine.charAt(inputPointer),
+                            currRegex)) {
+                        count++;
+                        inputPointer++;
+                    }
+                    ans = count <= 1;
+                    if (count >= 0)
                         inputPointer--;
                 } else
                     ans = containsTheseParameters(inputLine.charAt(inputPointer),
@@ -199,6 +238,19 @@ public class Character {
                     ans = count > 0;
                     if (count > 0)
                         inputPointer--;
+                } else if (currRegex.endsWith("?")) {
+                    int count = 0;
+                    while (
+                            inputLine
+                                    .substring(inputPointer,
+                                            inputPointer + currRegex.length() - 1)
+                                    .startsWith(currRegex.substring(0, currRegex.length() - 1))) {
+                        count++;
+                        inputPointer += currRegex.length() - 1;
+                    }
+                    ans = count <= 1;
+                    if (count >= 0)
+                        inputPointer--;
                 }
             } else if (currRegex.length() == 1) {
                 ans = inputLine.charAt(inputPointer) == currRegex.charAt(0);
@@ -211,7 +263,7 @@ public class Character {
             inputPointer++;
             if (ans && patternPointer == pattern.length())
                 return true;
-            if (inputPointer >= inputLine.length())
+            if (inputPointer >= inputLine.length() + 1)
                 return false;
         }
         return false;
