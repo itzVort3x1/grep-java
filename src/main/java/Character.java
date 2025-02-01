@@ -42,11 +42,25 @@ public class Character {
         return false;
     }
 
+    private boolean negativeCharacterGroups(String pattern) {
+        char[] patternArr = pattern.toCharArray();
+        for (char c : patternArr) {
+            if (sourceStr.contains(c + "")) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public boolean matchPattern(String inputLine, String pattern) {
         if (pattern.equals("\\d")) {
             return checkDigit();
         } else if (pattern.equals("\\w")) {
             return checkLetter();
+        } else if (pattern.charAt(0) == '[' &&
+                pattern.charAt(pattern.length() - 1) == ']' && pattern.charAt(1) == '^') {
+            return negativeCharacterGroups(
+                    pattern.substring(1, pattern.length() - 1));
         } else if (pattern.charAt(0) == '[' &&
                 pattern.charAt(pattern.length() - 1) == ']') {
             return positiveCharacterGroups(
