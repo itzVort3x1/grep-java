@@ -3,6 +3,8 @@ import java.util.Set;
 
 public class Character {
     private static String sourceStr = "";
+    private static final Set<java.lang.Character> specialStartCharacters = Set.of('[', '\\', '$');
+    private static final Set<String> specialEndCharacters = Set.of("]", "\\w", "\\d");
 
     Character(String source) { this.sourceStr = source; }
 
@@ -76,10 +78,45 @@ public class Character {
         return inputChar >= '0' && inputChar <= '9';
     }
 
+    private static String findEndString(String pattern) {
+        int maxIndex = Integer.MIN_VALUE;
+        String maxCurr = "";
+        for (String s : specialEndCharacters) {
+            if (pattern.lastIndexOf(s) > maxIndex) {
+                maxIndex = pattern.lastIndexOf(s);
+                maxCurr = s;
+            }
+        }
+        if (maxIndex == -1) {
+            return pattern.substring(0, pattern.length() - 1);
+        }
+        return pattern.substring(maxIndex + maxCurr.length(), pattern.length() - 1);
+    }
+    private static String findStartString(String pattern) {
+        for (int i = 1; i < pattern.length(); i++) {
+            if (specialStartCharacters.contains(pattern.charAt(i))) {
+                return pattern.substring(1, i);
+            }
+        }
+        return pattern.substring(1);
+    }
+
     public boolean matchPattern(String inputLine, String pattern) {
         int patternPointer = 0;
         int inputPointer = 0;
         boolean ans;
+        if (pattern.startsWith("^")) {
+            String startPattern = findStartString(pattern);
+            if (!inputLine.startsWith(startPattern))
+                return false;
+            pattern = pattern.substring(startPattern.length());
+        }
+        if (pattern.endsWith("$")) {
+            String endPattern = findEndString(pattern);
+            if (!inputLine.endsWith(endPattern))
+                return false;
+            pattern = pattern.substring(0, pattern.length() - endPattern.length());
+        }
         while (inputPointer < inputLine.length()) {
             String currRegex = getCurrentRegex(pattern, patternPointer);
             patternPointer += currRegex.length();
