@@ -26,7 +26,17 @@ public class Character {
             return currPattern.substring(0, currPattern.indexOf("]", currPattern.indexOf("[^")) + 1);
         } else if (currPattern.startsWith("[")) {
             return currPattern.substring(0, currPattern.indexOf("]", currPattern.indexOf("[")) + 1);
-        } else {
+        } else if (currPattern.startsWith("^")) {
+            int index =
+                    Math.min(currPattern.indexOf("\\") > 0 ? currPattern.indexOf("\\")
+                                    : Integer.MAX_VALUE,
+                            currPattern.indexOf("[") > 0 ? currPattern.indexOf("[")
+                                    : Integer.MAX_VALUE);
+            if (index == Integer.MAX_VALUE) {
+                return currPattern.substring(currPointer);
+            }
+            return currPattern.substring(currPointer, index);
+        }else {
             return currPattern.substring(0, 1);
         }
     }
@@ -81,6 +91,9 @@ public class Character {
                 ans = notContainsTheseParameters(inputLine.charAt(inputPointer), currRegex);
             } else if (currRegex.contains("[") && currRegex.contains("]")) {
                 ans = containsTheseParameters(inputLine.charAt(inputPointer), currRegex);
+            } else if (currRegex.length() > 1) {
+                ans = inputLine.equals(currRegex.substring(1));
+                inputPointer += currRegex.substring(1).length();
             } else if (currRegex.length() == 1) {
                 ans = inputLine.charAt(inputPointer) == currRegex.charAt(0);
             } else {
