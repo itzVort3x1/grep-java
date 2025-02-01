@@ -20,7 +20,9 @@ public class Main {
     Character charClass = new Character(inputLine);
 
     if (charClass.matchPattern(inputLine, pattern)) {
+        System.exit(0);
     } else {
+//        System.err.println("Logs from your program will appear here!");
         System.exit(1);
     }
   }
