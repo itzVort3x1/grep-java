@@ -11,11 +11,11 @@ public class Character {
 
     public String getSource() { return sourceStr; }
 
-    private static boolean isDigit(char c) {
+    public static boolean isDigit(char c) {
         return c >= '0' && c <= '9';
     }
 
-    private static boolean isLetter(char c) {
+    public static boolean isLetterOrDigit(char c) {
         return c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z';
     }
 
@@ -43,6 +43,12 @@ public class Character {
                 return currPattern.substring(0, index + 2);
             }
             return currPattern.substring(0, index + 1);
+        } else if (currPattern.startsWith(".")) {
+            if (currPointer + 1 < currPattern.length() &&
+                    multiplierChars.contains(pattern.charAt(currPointer + 1))) {
+                return currPattern.substring(0, 2);
+            }
+            return currPattern.substring(0, 1);
         } else {
             if (currPointer + 1 < currPattern.length() &&
                     multiplierChars.contains(pattern.charAt(currPointer + 1))) {
@@ -224,6 +230,35 @@ public class Character {
                 } else
                     ans = containsTheseParameters(inputLine.charAt(inputPointer),
                             currRegex);
+            } else if (currRegex.startsWith(".")) {
+                if (currRegex.endsWith("+")) {
+                    int count = 0;
+                    while (inputPointer < inputLine.length()) {
+                        if(inputLine.charAt(inputPointer) != inputLine.charAt(count)){
+                            ans = false;
+                        }
+                        count++;
+                        inputPointer++;
+                    }
+                    System.out.println("Pattern: " + pattern);
+                    System.out.println("Input Line: " + inputLine);
+                    System.out.println("Count: " + count);
+                    ans = count > 0;
+                    if (count > 0)
+                        inputPointer--;
+                } else if (currRegex.endsWith("?")) {
+                    int count = 0;
+                    while (inputPointer < inputLine.length()) {
+                        count++;
+                        inputPointer++;
+                    }
+                    ans = count <= 1;
+                    if (count >= 0)
+                        inputPointer--;
+                } else {
+                    ans = true;
+                }
+                System.out.println("ans: " + ans);
             } else if (currRegex.length() > 1) {
                 if (currRegex.endsWith("+")) {
                     int count = 0;
@@ -266,6 +301,6 @@ public class Character {
             if (inputPointer >= inputLine.length() + 1)
                 return false;
         }
-        return false;
+        return ans;
     }
 }
