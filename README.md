@@ -1,7 +1,7 @@
 # Grep Implementation in Java
 
 ## Overview
-This project is a Java implementation of the `grep` command, designed to match patterns in input strings using regular expressions. It follows the CodeCrafters platform specifications and utilizes Java's built-in capabilities for pattern matching.
+This project is a Java implementation of the `grep` command, designed to match patterns in input strings using regular expressions.
 
 ## Features
 - Supports pattern matching with:
@@ -14,7 +14,6 @@ This project is a Java implementation of the `grep` command, designed to match p
    - Grouping and alternation (e.g., `(abc|def)`)
 - Recursive approach for pattern evaluation
 - Java-based CLI interface
-- Compatible with CodeCrafters testing framework
 
 ## Directory Structure
 ```sh
@@ -26,7 +25,6 @@ This project is a Java implementation of the `grep` command, designed to match p
 │           ├── Character.java  # Pattern matching logic
 │           └── Main.java       # CLI entry point
 ├── pom.xml                     # Maven configuration
-├── codecrafters.yml            # CodeCrafters configuration
 └── your_program.sh             # Local execution script
 ```
 
@@ -56,7 +54,7 @@ If the input matches the pattern, the program exits with code `0`; otherwise, it
 
 ## Development
 ### Running Locally
-The `your_program.sh` script allows you to run the program locally with the same setup as CodeCrafters.
+The `your_program.sh` script allows you to run the program locally.
 
 ### Debugging
 Print debug logs using:
