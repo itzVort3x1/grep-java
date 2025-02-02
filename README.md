@@ -1,39 +1,79 @@
-[![progress-banner](https://backend.codecrafters.io/progress/grep/0d3bea03-c58c-476d-b767-ed5eaecf1eac)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
+# Grep Implementation in Java
 
-This is a starting point for Java solutions to the
-["Build Your Own grep" Challenge](https://app.codecrafters.io/courses/grep/overview).
+## Overview
+This project is a Java implementation of the `grep` command, designed to match patterns in input strings using regular expressions. It follows the CodeCrafters platform specifications and utilizes Java's built-in capabilities for pattern matching.
 
-[Regular expressions](https://en.wikipedia.org/wiki/Regular_expression)
-(Regexes, for short) are patterns used to match character combinations in
-strings. [`grep`](https://en.wikipedia.org/wiki/Grep) is a CLI tool for
-searching using Regexes.
+## Features
+- Supports pattern matching with:
+   - `.` (wildcard for any character)
+   - `+` (one or more occurrences)
+   - `?` (zero or one occurrence)
+   - Character classes (e.g., `[abc]`, `[^abc]`)
+   - Escape sequences (`\d`, `\w`)
+   - Anchors (`^` for start, `$` for end)
+   - Grouping and alternation (e.g., `(abc|def)`)
+- Recursive approach for pattern evaluation
+- Java-based CLI interface
+- Compatible with CodeCrafters testing framework
 
-In this challenge you'll build your own implementation of `grep`. Along the way
-we'll learn about Regex syntax, how parsers/lexers work, and how regular
-expressions are evaluated.
-
-**Note**: If you're viewing this repo on GitHub, head over to
-[codecrafters.io](https://codecrafters.io) to try the challenge.
-
-# Passing the first stage
-
-The entry point for your `grep` implementation is in `src/main/java/Main.java`.
-Study and uncomment the relevant code, and push your changes to pass the first
-stage:
-
+## Directory Structure
 ```sh
-git commit -am "pass 1st stage" # any msg
-git push origin master
+.
+├── README.md
+├── src/
+│   └── main/
+│       └── java/
+│           ├── Character.java  # Pattern matching logic
+│           └── Main.java       # CLI entry point
+├── pom.xml                     # Maven configuration
+├── codecrafters.yml            # CodeCrafters configuration
+└── your_program.sh             # Local execution script
 ```
 
-Time to move on to the next stage!
+## Installation & Usage
+### Prerequisites
+- Java 11 or later
+- Maven
 
-# Stage 2 & beyond
+### Compile the Project
+To build the project locally, run:
+```sh
+./your_program.sh
+```
 
-Note: This section is for stages 2 and beyond.
+### Run the Program
+To execute the program with a pattern:
+```sh
+./your_program.sh -E "pattern"
+```
+It reads input from `stdin` and matches it against the given pattern.
 
-1. Ensure you have `mvn` installed locally
-1. Run `./your_program.sh` to run your program, which is implemented in
-   `src/main/java/Main.java`.
-1. Commit your changes and run `git push origin master` to submit your solution
-   to CodeCrafters. Test output will be streamed to your terminal.
+### Example
+```sh
+$ echo "hello world" | ./your_program.sh -E "hello"
+```
+If the input matches the pattern, the program exits with code `0`; otherwise, it exits with `1`.
+
+## Development
+### Running Locally
+The `your_program.sh` script allows you to run the program locally with the same setup as CodeCrafters.
+
+### Debugging
+Print debug logs using:
+```java
+System.err.println("Debug message");
+```
+These will appear during test execution.
+
+### Testing
+Run test cases manually by executing the program with different patterns and inputs.
+
+## Deployment
+This project is built using Maven. The `pom.xml` ensures all dependencies are packaged correctly.
+
+## Contributions
+Feel free to fork and modify the project. Pull requests are welcome!
+
+## License
+This project is free to use and modify. 
+

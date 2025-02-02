@@ -19,288 +19,189 @@ public class Character {
         return c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z';
     }
 
-    private static String getCurrentRegex(String pattern, int currPointer) {
-        String currPattern = pattern.substring(currPointer);
-        if (currPattern.startsWith("\\d+")) {
-            return "\\d+";
-        } else if (currPattern.startsWith("\\w+")) {
-            return "\\w+";
-        } else if (currPattern.startsWith("\\d")) {
-            return "\\d";
-        } else if (currPattern.startsWith("\\w")) {
-            return "\\w";
-        } else if (currPattern.startsWith("[^")) {
-            int index = currPattern.indexOf("]", currPattern.indexOf("[^"));
-            if (index + 1 < pattern.length() &&
-                    multiplierChars.contains(currPattern.charAt(index + 1))) {
-                return currPattern.substring(0, index + 2);
+    public static boolean handleForTheseTogetherRecursive(String inputLine, String pattern, int inputIndex, int patternIndex) {
+        if (patternIndex == pattern.length()) {
+            return true;
+        }
+        if (inputIndex < inputLine.length() && patternIndex < pattern.length() && inputLine.charAt(inputIndex) == pattern.charAt(patternIndex)) {
+            return handleForTheseTogetherRecursive(inputLine, pattern, inputIndex + 1, patternIndex + 1);
+        }
+        if (patternIndex < pattern.length() && pattern.charAt(patternIndex) == '+') {
+            int countInPattern = 1;
+            int indexAfterPlus = patternIndex + 1;
+            while (indexAfterPlus < pattern.length() && pattern.charAt(patternIndex - 1) == pattern.charAt(indexAfterPlus)) {
+                countInPattern++;
+                indexAfterPlus++;
             }
-            return currPattern.substring(0, index + 1);
-        } else if (currPattern.startsWith("[")) {
-            int index = currPattern.indexOf("]", currPattern.indexOf("["));
-            if (index + 1 < pattern.length() &&
-                    multiplierChars.contains(currPattern.charAt(index + 1))) {
-                return currPattern.substring(0, index + 2);
+            int countInInput = 1;
+            int indexInInput = inputIndex;
+            while (indexInInput < inputLine.length() && inputLine.charAt(inputIndex - 1) == inputLine.charAt(indexInInput)) {
+                countInInput++;
+                indexInInput++;
             }
-            return currPattern.substring(0, index + 1);
-        } else if (currPattern.startsWith(".")) {
-            if (currPointer + 1 < currPattern.length() &&
-                    multiplierChars.contains(pattern.charAt(currPointer + 1))) {
-                return currPattern.substring(0, 2);
-            }
-            return currPattern.substring(0, 1);
-        } else {
-            if (currPointer + 1 < currPattern.length() &&
-                    multiplierChars.contains(pattern.charAt(currPointer + 1))) {
-                return currPattern.substring(0, 2);
-            }
-            return currPattern.substring(0, 1);
-        }
-    }
-
-    private static boolean notContainsTheseParameters(char inputLine,
-                                                      String pattern) {
-        char[] list = pattern.toCharArray();
-        Set<java.lang.Character> setOfChar = new HashSet<>();
-        for (char curr : list) {
-            setOfChar.add(curr);
-        }
-        setOfChar.remove('[');
-        setOfChar.remove(']');
-        setOfChar.remove('^');
-        setOfChar.remove('+');
-        return !setOfChar.contains(inputLine);
-    }
-
-    private static boolean containsTheseParameters(char inputChar,
-                                                   String pattern) {
-        char[] list = pattern.toCharArray();
-        Set<java.lang.Character> setOfChar = new HashSet<>();
-        for (char curr : list) {
-            setOfChar.add(curr);
-        }
-        setOfChar.remove('[');
-        setOfChar.remove(']');
-        return setOfChar.contains(inputChar);
-    }
-
-    private static boolean hasAlphaNumericAndUnderScore(char inputChar) {
-        return (inputChar >= '0' && inputChar <= '9') ||
-                (inputChar >= 'a' && inputChar <= 'z') ||
-                (inputChar >= 'A' && inputChar <= 'Z') || (inputChar == '_');
-    }
-
-    private static boolean hasNumbers(char inputChar) {
-        return inputChar >= '0' && inputChar <= '9';
-    }
-
-    private static String findEndString(String pattern) {
-        int maxIndex = Integer.MIN_VALUE;
-        String maxCurr = "";
-        for (String s : specialEndCharacters) {
-            if (pattern.lastIndexOf(s) > maxIndex) {
-                maxIndex = pattern.lastIndexOf(s);
-                maxCurr = s;
-            }
-        }
-        if (maxIndex == -1) {
-            return pattern.substring(0, pattern.length() - 1);
-        }
-        return pattern.substring(maxIndex + maxCurr.length(), pattern.length() - 1);
-    }
-    private static String findStartString(String pattern) {
-        for (int i = 1; i < pattern.length(); i++) {
-            if (specialStartCharacters.contains(pattern.charAt(i))) {
-                return pattern.substring(1, i);
-            }
-        }
-        return pattern.substring(1);
-    }
-
-    public boolean matchPattern(String inputLine, String pattern) {
-        int patternPointer = 0;
-        int inputPointer = 0;
-        boolean ans = false;
-        if (pattern.startsWith("^")) {
-            String startPattern = findStartString(pattern);
-            if (!inputLine.startsWith(startPattern))
-                return false;
-            pattern = pattern.substring(startPattern.length());
-        }
-        if (pattern.endsWith("$")) {
-            String endPattern = findEndString(pattern);
-            if (!inputLine.endsWith(endPattern))
-                return false;
-            pattern = pattern.substring(0, pattern.length() - endPattern.length());
-        }
-        while (inputPointer < inputLine.length()) {
-            String currRegex = getCurrentRegex(pattern, patternPointer);
-            patternPointer += currRegex.length();
-            if (currRegex.startsWith("\\d")) {
-                if (currRegex.equals("\\d"))
-                    ans = hasNumbers(inputLine.charAt(inputPointer));
-                else if (currRegex.contains("+")) {
-                    int count = 0;
-                    while (inputLine.charAt(inputPointer) >= '0' &&
-                            inputLine.charAt(inputPointer) <= '9') {
-                        count++;
-                        inputPointer++;
-                    }
-                    ans = count > 0;
-                    if (count > 0)
-                        inputPointer--;
-                } else if (currRegex.contains("?")) {
-                    int count = 0;
-                    while (inputLine.charAt(inputPointer) >= '0' &&
-                            inputLine.charAt(inputPointer) <= '9') {
-                        count++;
-                        inputPointer++;
-                    }
-                    ans = count <= 1;
-                    if (count >= 0)
-                        inputPointer--;
-                }
-            } else if (currRegex.startsWith("\\w")) {
-                if (currRegex.equals("\\w"))
-                    ans = hasAlphaNumericAndUnderScore(inputLine.charAt(inputPointer));
-                else if (currRegex.contains("+")) {
-                    int count = 0;
-                    while (hasAlphaNumericAndUnderScore(inputLine.charAt(inputPointer))) {
-                        count++;
-                        inputPointer++;
-                    }
-                    ans = count > 0;
-                    if (count > 0)
-                        inputPointer--;
-                } else if (currRegex.contains("?")) {
-                    int count = 0;
-                    while (hasAlphaNumericAndUnderScore(inputLine.charAt(inputPointer))) {
-                        count++;
-                        inputPointer++;
-                    }
-                    ans = count <= 0;
-                    if (count >= 0)
-                        inputPointer--;
-                }
-            } else if (currRegex.contains("[^") && currRegex.contains("]")) {
-                if (currRegex.endsWith("+")) {
-                    int count = 0;
-                    while (notContainsTheseParameters(inputLine.charAt(inputPointer),
-                            currRegex)) {
-                        count++;
-                        inputPointer++;
-                    }
-                    ans = count > 0;
-                    if (count > 0)
-                        inputPointer--;
-                } else if (currRegex.endsWith("?")) {
-                    int count = 0;
-                    while (notContainsTheseParameters(inputLine.charAt(inputPointer),
-                            currRegex)) {
-                        count++;
-                        inputPointer++;
-                    }
-                    ans = count <= 1;
-                    if (count >= 0)
-                        inputPointer--;
-                } else
-                    ans = notContainsTheseParameters(inputLine.charAt(inputPointer),
-                            currRegex);
-            } else if (currRegex.contains("[") && currRegex.contains("]")) {
-                if (currRegex.endsWith("+")) {
-                    int count = 0;
-                    while (containsTheseParameters(inputLine.charAt(inputPointer),
-                            currRegex)) {
-                        count++;
-                        inputPointer++;
-                    }
-                    ans = count > 0;
-                    if (count > 0)
-                        inputPointer--;
-                } else if (currRegex.endsWith("?")) {
-                    int count = 0;
-                    while (containsTheseParameters(inputLine.charAt(inputPointer),
-                            currRegex)) {
-                        count++;
-                        inputPointer++;
-                    }
-                    ans = count <= 1;
-                    if (count >= 0)
-                        inputPointer--;
-                } else
-                    ans = containsTheseParameters(inputLine.charAt(inputPointer),
-                            currRegex);
-            } else if (currRegex.startsWith(".")) {
-                if (currRegex.endsWith("+")) {
-                    int count = 0;
-                    while (inputPointer < inputLine.length()) {
-                        if(inputLine.charAt(inputPointer) != inputLine.charAt(count)){
-                            ans = false;
-                        }
-                        count++;
-                        inputPointer++;
-                    }
-                    System.out.println("Pattern: " + pattern);
-                    System.out.println("Input Line: " + inputLine);
-                    System.out.println("Count: " + count);
-                    ans = count > 0;
-                    if (count > 0)
-                        inputPointer--;
-                } else if (currRegex.endsWith("?")) {
-                    int count = 0;
-                    while (inputPointer < inputLine.length()) {
-                        count++;
-                        inputPointer++;
-                    }
-                    ans = count <= 1;
-                    if (count >= 0)
-                        inputPointer--;
-                } else {
-                    ans = true;
-                }
-                System.out.println("ans: " + ans);
-            } else if (currRegex.length() > 1) {
-                if (currRegex.endsWith("+")) {
-                    int count = 0;
-                    while (
-                            inputLine
-                                    .substring(inputPointer,
-                                            inputPointer + currRegex.length() - 1)
-                                    .startsWith(currRegex.substring(0, currRegex.length() - 1))) {
-                        count++;
-                        inputPointer += currRegex.length() - 1;
-                    }
-                    ans = count > 0;
-                    if (count > 0)
-                        inputPointer--;
-                } else if (currRegex.endsWith("?")) {
-                    int count = 0;
-                    while (
-                            inputLine
-                                    .substring(inputPointer,
-                                            inputPointer + currRegex.length() - 1)
-                                    .startsWith(currRegex.substring(0, currRegex.length() - 1))) {
-                        count++;
-                        inputPointer += currRegex.length() - 1;
-                    }
-                    ans = count <= 1;
-                    if (count >= 0)
-                        inputPointer--;
-                }
-            } else if (currRegex.length() == 1) {
-                ans = inputLine.charAt(inputPointer) == currRegex.charAt(0);
+            if (countInInput >= countInPattern) {
+                return handleForTheseTogetherRecursive(inputLine, pattern, indexInInput, indexAfterPlus);
             } else {
-                throw new RuntimeException("Unhandled pattern: " + pattern);
-            }
-            if (!ans) {
-                patternPointer = 0;
-            }
-            inputPointer++;
-            if (ans && patternPointer == pattern.length())
-                return true;
-            if (inputPointer >= inputLine.length() + 1)
                 return false;
+            }
         }
-        return ans;
+        if (patternIndex < pattern.length() && pattern.charAt(patternIndex) == '?') {
+            return handleForTheseTogetherRecursive(inputLine, pattern, inputIndex, patternIndex + 1) || handleForTheseTogetherRecursive(inputLine, pattern, inputIndex + 1, patternIndex + 1);
+        }
+        if (patternIndex < pattern.length() && pattern.charAt(patternIndex) == '.') {
+            return handleForTheseTogetherRecursive(inputLine, pattern, inputIndex + 1, patternIndex + 1);
+        }
+        return false;
+    }
+
+    public static boolean handleForTheseTogether(String inputLine, String pattern) {
+        return handleForTheseTogetherRecursive(inputLine, pattern, 0, 0);
+    }
+
+    public static boolean matchZeroOrOneRecursive(String inputLine, String pattern, int inputIndex, int patternIndex) {
+        if (patternIndex == pattern.length()) {
+            return true;
+        }
+        if (inputIndex < inputLine.length() && patternIndex < pattern.length() && inputLine.charAt(inputIndex) == pattern.charAt(patternIndex)) {
+            return matchZeroOrOneRecursive(inputLine, pattern, inputIndex + 1, patternIndex + 1);
+        }
+        if (patternIndex < pattern.length() && pattern.charAt(patternIndex) == '?') {
+            return matchZeroOrOneRecursive(inputLine, pattern, inputIndex, patternIndex + 1) || matchZeroOrOneRecursive(inputLine, pattern, inputIndex + 1, patternIndex + 1);
+        }
+        return false;
+    }
+
+    public static boolean matchZeroOrOne(String inputLine, String pattern) {
+        return matchZeroOrOneRecursive(inputLine, pattern, 0, 0);
+    }
+
+    public static boolean matchOneOrMoreRecursive(String inputLine, String pattern, int inputIndex, int patternIndex) {
+        if (patternIndex == pattern.length()) {
+            return true;
+        }
+        if (inputIndex < inputLine.length() && patternIndex < pattern.length() && inputLine.charAt(inputIndex) == pattern.charAt(patternIndex)) {
+            return matchOneOrMoreRecursive(inputLine, pattern, inputIndex + 1, patternIndex + 1);
+        }
+        if (patternIndex < pattern.length() && pattern.charAt(patternIndex) == '+') {
+            int countInPattern = 1;
+            int indexAfterPlus = patternIndex + 1;
+            while (indexAfterPlus < pattern.length() && pattern.charAt(patternIndex - 1) == pattern.charAt(indexAfterPlus)) {
+                countInPattern++;
+                indexAfterPlus++;
+            }
+            int countInInput = 1;
+            int indexInInput = inputIndex;
+            while (indexInInput < inputLine.length() && inputLine.charAt(inputIndex - 1) == inputLine.charAt(indexInInput)) {
+                countInInput++;
+                indexInInput++;
+            }
+            if (countInInput >= countInPattern) {
+                return matchOneOrMoreRecursive(inputLine, pattern, indexInInput, indexAfterPlus);
+            } else {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    public static boolean matchOneOrMore(String inputLine, String pattern) {
+        return matchOneOrMoreRecursive(inputLine, pattern, 0, 0);
+    }
+
+    public static boolean matchPatternRecursive(String inputLine, String pattern, int inputIndex, int patternIndex) {
+        if (patternIndex == pattern.length()) {
+            return true;
+        }
+        if (patternIndex < pattern.length() && pattern.charAt(patternIndex) == '\\') {
+            patternIndex++;
+            if (patternIndex < pattern.length() && pattern.charAt(patternIndex) == 'd') {
+                return inputIndex < inputLine.length() && isDigit(inputLine.charAt(inputIndex)) && matchPatternRecursive(inputLine, pattern, inputIndex + 1, patternIndex + 1);
+            } else if (patternIndex < pattern.length() && pattern.charAt(patternIndex) == 'w') {
+                return inputIndex < inputLine.length() && isLetterOrDigit(inputLine.charAt(inputIndex)) && matchPatternRecursive(inputLine, pattern, inputIndex + 1, patternIndex + 1);
+            }
+        } else {
+            if (inputIndex < inputLine.length() && patternIndex < pattern.length() && inputLine.charAt(inputIndex) == pattern.charAt(patternIndex)) {
+                return matchPatternRecursive(inputLine, pattern, inputIndex + 1, patternIndex + 1);
+            }
+        }
+        return false;
+    }
+
+    public static boolean matchPatternV2(String inputLine, String pattern) {
+        return matchPatternRecursive(inputLine, pattern, 0, 0);
+    }
+
+    public static boolean matchPattern(String inputLine, String pattern) {
+        if (pattern.contains("(") && pattern.contains(")")) {
+            String beforeBracket = pattern.substring(0, pattern.indexOf('('));
+            String afterBracket = pattern.substring(pattern.indexOf(')') + 1);
+            String[] subPatterns = pattern.substring(pattern.indexOf('(') + 1, pattern.indexOf(')')).split("\\|");
+            for (String subPattern : subPatterns) {
+                String newPattern = beforeBracket + subPattern + afterBracket;
+                if (matchPattern(inputLine, newPattern)) {
+                    return true;
+                }
+            }
+            return false;
+        } else if ("\\d".equals(pattern)) {
+            return inputLine.matches(".*\\d.*");
+        } else if ("\\w".equals(pattern)) {
+            return inputLine.matches(".*\\w.*");
+        } else if (pattern.startsWith("[^") && pattern.endsWith("]")) {
+            String charGroup = pattern.substring(2, pattern.length() - 1);
+            return inputLine.matches(".*[^" + charGroup + "].*");
+        } else if (pattern.startsWith("[") && pattern.endsWith("]")) {
+            String charGroup = pattern.substring(1, pattern.length() - 1);
+            return inputLine.matches(".*[" + charGroup + "].*");
+        } else if (pattern.contains("\\d") || pattern.contains("\\w")) {
+            for (int i = 0; i < inputLine.length(); i++) {
+                boolean match = matchPatternV2(inputLine.substring(i), pattern);
+                if (match) {
+                    return true;
+                }
+            }
+            return false;
+        } else if (pattern.startsWith("^")) {
+            return inputLine.startsWith(pattern.substring(1));
+        } else if (pattern.endsWith("$")) {
+            return inputLine.endsWith(pattern.substring(0, pattern.length() - 1));
+        }
+        if (pattern.contains(".+")) {
+            String[] parts = pattern.split("\\.\\+");
+            String firstPart = parts[0];
+            String secondPart = parts[1];
+            for (int i = 0; i < inputLine.length(); i++) {
+                if (inputLine.substring(i).startsWith(firstPart)) {
+                    for (int j = i + firstPart.length(); j < inputLine.length(); j++) {
+                        if (inputLine.substring(j).startsWith(secondPart)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+        if (pattern.contains("+") || pattern.contains("?") || pattern.contains(("."))) {
+            for (int i = 0; i < inputLine.length(); i++) {
+                boolean match = handleForTheseTogether(inputLine.substring(i), pattern);
+                if (match) {
+                    return true;
+                }
+            }
+            for (int i = 0; i < pattern.length(); i++) {
+                boolean match = handleForTheseTogether(inputLine, pattern.substring(i));
+                if (match) {
+                    return true;
+                }
+            }
+            return false;
+        } else if (pattern.length() == inputLine.length()) {
+            return inputLine.equals(pattern);
+        }
+        else if (pattern.length() == 1) {
+            return inputLine.contains(pattern);
+        } else {
+            throw new RuntimeException("Unhandled pattern: " + pattern);
+        }
     }
 }
